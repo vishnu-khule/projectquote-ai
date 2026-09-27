@@ -8,7 +8,7 @@
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "echo \"lint pending\"",
-    "test": "node --import tsx --test 'src/**/*.test.ts'",
+    "test": "node --import tsx --test $(find src -type f -name '*.test.ts')",
     "db:generate": "prisma generate --schema=prisma/schema.prisma",
     "db:migrate": "prisma migrate dev --schema=prisma/schema.prisma",
     "db:migrate:deploy": "prisma migrate deploy --schema=prisma/schema.prisma",
