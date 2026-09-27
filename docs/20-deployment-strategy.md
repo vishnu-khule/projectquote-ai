@@ -20,8 +20,9 @@ Blue/green or previous image tag; DB rollback via restore snapshot only (no down
 
 ## Production checklist
 
-- [ ] JWT secret rotated
-- [ ] S3 bucket private + CORS
-- [ ] Rate limits enabled
-- [ ] AI budget caps per org
-- [ ] Error alerting configured
+- [ ] JWT secret rotated (set strong `JWT_SECRET` in prod — never use `.env.example` value)
+- [ ] S3 bucket private + CORS (restrict `APP_URL` origin)
+- [x] Rate limits enabled (`@nestjs/throttler`, `RATE_LIMIT_*` env)
+- [x] AI budget caps per org (`AI_MONTHLY_BUDGET_CAP_CENTS`, token usage from `ai_runs`)
+- [ ] Error alerting configured (wire Sentry/Datadog in hosting)
+- [x] Container images (`apps/api/Dockerfile`, `apps/web/Dockerfile`, `docker-compose.app.yml`)

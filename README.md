@@ -33,7 +33,9 @@ pnpm dev
 - Web: http://localhost:3000  
 - API health: http://localhost:4000/health  
 
-Set `OPENAI_API_KEY` in `.env` when implementing AI modules.
+Set `OPENAI_API_KEY` in `.env` for live AI and **vector RAG** (keyword fallback without it).
+
+Optional: `PROPOSAL_LLM_NARRATIVE=true`, `AI_MONTHLY_BUDGET_CAP_CENTS`, `RATE_LIMIT_*`.
 
 ### API (Phase 1)
 

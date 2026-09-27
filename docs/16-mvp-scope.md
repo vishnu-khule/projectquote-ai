@@ -21,7 +21,7 @@
 - [x] RAG-lite over project documents (chunk index + retrieval)
 - [x] Validation blocking rules (approve/share)
 - [x] Org price catalog API (materials seed)
-- [ ] Full vector embeddings + cross-project RAG
+- [x] Full vector embeddings + cross-project RAG (OpenAI embeddings + pgvector; org-wide retrieval)
 - [x] Labour catalog + tax admin UI (material/labour tabs, org default tax)
 - [x] Catalog → estimate line picker (`POST …/line-items/from-catalog`)
 

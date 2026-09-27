@@ -7,6 +7,7 @@ import { DocumentProcessingQueue } from "./document-processing.queue.js";
 import { DocumentsController } from "./documents.controller.js";
 import { DocumentsService } from "./documents.service.js";
 import { DocumentIndexService } from "./document-index.service.js";
+import { EmbeddingService } from "./embedding.service.js";
 
 @Module({
   imports: [ProjectsModule],
@@ -17,6 +18,7 @@ import { DocumentIndexService } from "./document-index.service.js";
     DocumentProcessingQueue,
     DocumentEventsService,
     DocumentIndexService,
+    EmbeddingService,
   ],
   exports: [DocumentEventsService, DocumentIndexService],
 })

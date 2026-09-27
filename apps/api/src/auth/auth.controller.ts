@@ -32,4 +32,16 @@ export class AuthController {
   me(@CurrentUser() user: JwtPayload) {
     return this.auth.me(user);
   }
+
+  /** Phase 1.5 placeholder — set GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET to enable wiring. */
+  @Get("oauth/google")
+  googleOAuthStatus() {
+    return {
+      enabled: Boolean(
+        process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
+      ),
+      message:
+        "Google sign-in UI is Phase 1.5. Use email/password for MVP; OAuth routes will attach here.",
+    };
+  }
 }

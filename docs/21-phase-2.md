@@ -15,4 +15,10 @@
 pnpm --filter @projectquote/api db:migrate
 ```
 
-Migrations: `20260327010000_ai_chat` through `20260327040000_phase2`.
+Migrations: `20260327010000_ai_chat` through `20260327050000_catalog_labour_tax`.
+
+## Vector RAG
+
+- Chunks get **OpenAI embeddings** stored in `DocumentChunk.embedding` (pgvector).
+- Chat uses **project** similarity search, then **org-wide** cross-project chunks (excludes current project).
+- Without `OPENAI_API_KEY`, retrieval falls back to keyword RAG-lite.

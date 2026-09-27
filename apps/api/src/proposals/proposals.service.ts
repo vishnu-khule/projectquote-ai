@@ -11,6 +11,7 @@ import { ProjectsService } from "../projects/projects.service.js";
 import { StorageService } from "../storage/storage.service.js";
 import { PdfService } from "../pdf/pdf.service.js";
 import { ProposalBuilderService } from "./proposal-builder.service.js";
+import { ProposalNarrativeService } from "./proposal-narrative.service.js";
 import { ValidationService } from "../validation/validation.service.js";
 
 @Injectable()
@@ -22,6 +23,7 @@ export class ProposalsService {
     private readonly pdf: PdfService,
     private readonly storage: StorageService,
     private readonly validation: ValidationService,
+    private readonly narrative: ProposalNarrativeService,
   ) {}
 
   async getLatest(orgId: string, projectId: string) {
@@ -85,6 +87,12 @@ export class ProposalsService {
       exclusions,
     });
 
+    const sections = await this.narrative.enrichOverview(built.sections, {
+      projectTitle: project.title,
+      projectDescription: project.projectDescription,
+      lineItemNames: estimate.items.map((i) => i.name),
+    });
+
     const lastVersion = await this.prisma.proposal.findFirst({
       where: { projectId },
       orderBy: { version: "desc" },
@@ -98,7 +106,7 @@ export class ProposalsService {
         title: built.title,
         version,
         tier: estimate.tier,
-        sections: built.sections as Prisma.InputJsonValue,
+        sections: sections as Prisma.InputJsonValue,
         status: "review",
       },
     });

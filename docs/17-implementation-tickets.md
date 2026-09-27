@@ -2,9 +2,9 @@
 
 ## EPIC-1 Platform bootstrap
 
-- T1.1 Monorepo turbo pipeline
-- T1.2 Docker compose + `.env.example`
-- T1.3 GitHub Actions: lint, typecheck, test
+- [x] T1.1 Monorepo turbo pipeline
+- [x] T1.2 Docker compose + `.env.example`
+- [x] T1.3 GitHub Actions: lint, typecheck, test (+ Prisma validate, Docker build workflow)
 - **Acceptance**: `docker compose up` healthy; CI green on main
 
 ## EPIC-2 Auth & tenancy
@@ -44,6 +44,7 @@
 
 - [x] T7.1 Proposal builder + section editor (deterministic from estimate)
 - [x] T7.2 PDFKit PDF to S3 + download
+- [x] T7.3 Optional LLM overview narrative (`PROPOSAL_LLM_NARRATIVE=true`)
 - **Acceptance**: approved proposal produces downloadable PDF
 
 ## EPIC-8 Share
@@ -51,3 +52,10 @@
 - [x] T8.1 Tokenized public page + PDF download
 - [x] T8.2 View/download event tracking on share
 - **Acceptance**: no internal fields in public JSON
+
+## Post-MVP (tracked in roadmap)
+
+- Google OAuth UI (env stub: `GET /auth/oauth/google`)
+- Org member invites
+- Playwright full journey E2E in CI (smoke tests in `e2e/`)
+- Production secrets checklist (`docs/20-deployment-strategy.md`)

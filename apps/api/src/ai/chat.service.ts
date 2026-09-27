@@ -11,6 +11,7 @@ import path from "node:path";
 import { PrismaService } from "../prisma/prisma.service.js";
 import { ProjectsService } from "../projects/projects.service.js";
 import { DocumentIndexService } from "../documents/document-index.service.js";
+import { AiBudgetService } from "./ai-budget.service.js";
 import { ConversationAgent } from "./agents/conversation.agent.js";
 import type { ChatMessage } from "./providers/ai-provider.interface.js";
 
@@ -35,6 +36,7 @@ export class ChatService {
     private readonly projects: ProjectsService,
     private readonly conversationAgent: ConversationAgent,
     private readonly documentIndex: DocumentIndexService,
+    private readonly aiBudget: AiBudgetService,
   ) {}
 
   async listMessages(orgId: string, projectId: string) {
@@ -61,13 +63,14 @@ export class ChatService {
     stream: boolean,
     res?: Response,
   ) {
+    await this.aiBudget.assertWithinBudget(orgId);
     const project = await this.getProject(orgId, projectId);
     const conversation = await this.getOrCreateConversation(projectId);
 
     const historyBefore = await this.loadHistory(conversation.id);
     await this.saveMessage(conversation.id, "user", message);
 
-    const context = await this.buildContext(project, message);
+    const context = await this.buildContext(orgId, project, message);
 
     if (stream && res) {
       return this.sendStreaming(
@@ -229,15 +232,22 @@ export class ChatService {
   }
 
   private async buildContext(
+    orgId: string,
     project: Awaited<ReturnType<ChatService["getProject"]>>,
     query?: string,
   ) {
     const requirements = (project.requirements ?? {}) as Record<string, unknown>;
-    const ragChunks = query
-      ? await this.documentIndex.search(project.id, query)
-      : [];
+    const [ragChunks, orgRagChunks] = query
+      ? await Promise.all([
+          this.documentIndex.search(project.id, query),
+          this.documentIndex.searchOrganization(orgId, query, project.id, 3),
+        ])
+      : [[], []];
     const documentSummaries = [
       ...ragChunks.map((c, i) => `RAG chunk ${i + 1}:\n${c.slice(0, 1200)}`),
+      ...orgRagChunks.map(
+        (c, i) => `Org knowledge ${i + 1}:\n${c.slice(0, 1200)}`,
+      ),
       ...project.documents.map((doc) => {
       const meta = doc.metadata as Record<string, unknown>;
       const extraction = meta.extraction;

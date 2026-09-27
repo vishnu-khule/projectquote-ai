@@ -19,5 +19,7 @@ jobs:
       - run: pnpm install --frozen-lockfile || pnpm install
       - run: pnpm --filter @projectquote/api exec prisma generate
       - run: pnpm --filter @projectquote/schemas build
+      - run: pnpm --filter @projectquote/api exec prisma validate
+      - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm --filter @projectquote/api test
