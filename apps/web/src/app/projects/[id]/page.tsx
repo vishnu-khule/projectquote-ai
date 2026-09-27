@@ -14,6 +14,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { ProjectChat } from "@/components/project-chat";
 import { EstimateEditor } from "@/components/estimate-editor";
 import { ProposalPanel } from "@/components/proposal-panel";
+import { ProjectValidation } from "@/components/project-validation";
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -97,6 +98,7 @@ export default function ProjectDetailPage() {
         <div className="mt-8 space-y-8">
           <ProjectChat projectId={projectId} accessToken={accessToken} />
           <EstimateEditor projectId={projectId} accessToken={accessToken} />
+          <ProjectValidation projectId={projectId} accessToken={accessToken} />
           <ProposalPanel projectId={projectId} accessToken={accessToken} />
         </div>
       )}

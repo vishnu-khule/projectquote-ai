@@ -303,13 +303,60 @@ export async function getTierEstimates(
   return res.json();
 }
 
+export type ValidationResultDto = {
+  status: "PASS" | "WARNING" | "BLOCKED";
+  issues: string[];
+  warnings: string[];
+  suggestions: string[];
+};
+
 export async function validateProject(
   token: string,
   projectId: string,
-): Promise<{ status: string; issues: string[]; warnings: string[] }> {
+): Promise<ValidationResultDto> {
   const res = await fetch(`${API_URL}/projects/${projectId}/validate`, {
     method: "POST",
     headers: authHeaders(token),
+  });
+  if (!res.ok) await parseError(res);
+  return res.json();
+}
+
+export type CatalogItemDto = {
+  id: string;
+  sku: string;
+  name: string;
+  category: string;
+  unit: string;
+  unitPrice: string;
+  taxPercent: string;
+};
+
+export async function listCatalogItems(
+  token: string,
+): Promise<CatalogItemDto[]> {
+  const res = await fetch(`${API_URL}/catalog/items`, {
+    headers: authHeaders(token),
+  });
+  if (!res.ok) await parseError(res);
+  return res.json();
+}
+
+export async function createCatalogItem(
+  token: string,
+  input: {
+    sku: string;
+    name: string;
+    category: string;
+    unit: string;
+    unitPrice: string;
+    taxPercent?: string;
+  },
+): Promise<CatalogItemDto> {
+  const res = await fetch(`${API_URL}/catalog/items`, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify(input),
   });
   if (!res.ok) await parseError(res);
   return res.json();
