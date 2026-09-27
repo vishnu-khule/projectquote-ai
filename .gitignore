@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build
+dist
+.next
+out
+build
+.turbo
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & debug
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test & coverage
+coverage
+.nyc_output
+
+# Prisma / DB local
+*.db
+*.db-journal
+
+# Uploads (local dev)
+uploads/
+tmp/
+
+# Playwright
+test-results
+playwright-report

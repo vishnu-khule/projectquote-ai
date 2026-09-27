@@ -1,0 +1,81 @@
+{
+  "id": "interior-modular-kitchen",
+  "label": "Modular Kitchen",
+  "category": "interior",
+  "measurementUnits": ["ft", "m"],
+  "requiredFields": [
+    "dimensions.length",
+    "dimensions.width",
+    "location",
+    "finish.tier",
+    "countertop.material"
+  ],
+  "optionalFields": [
+    "brand.preference",
+    "hardware.tier",
+    "appliances.included"
+  ],
+  "materialCategories": [
+    "carcass",
+    "shutter",
+    "laminate",
+    "hardware",
+    "countertop",
+    "accessories"
+  ],
+  "labourCategories": ["fabrication", "installation", "plumbing", "electrical"],
+  "proposalSections": [
+    "cover",
+    "overview",
+    "scope",
+    "materials",
+    "specifications",
+    "methodology",
+    "timeline",
+    "cost_breakdown",
+    "payment_terms",
+    "warranty",
+    "assumptions",
+    "exclusions",
+    "terms",
+    "acceptance"
+  ],
+  "tierRules": {
+    "basic": {
+      "materialTier": "standard",
+      "hardwareTier": "standard",
+      "warrantyMonths": 12,
+      "priceUpliftPercent": "0"
+    },
+    "modern": {
+      "materialTier": "mid",
+      "hardwareTier": "soft_close",
+      "warrantyMonths": 24,
+      "priceUpliftPercent": "15"
+    },
+    "premium": {
+      "materialTier": "premium",
+      "hardwareTier": "premium",
+      "warrantyMonths": 36,
+      "priceUpliftPercent": "30"
+    }
+  },
+  "clarificationQuestions": [
+    {
+      "whenMissing": "dimensions.length",
+      "question": "What is the kitchen length (in feet or meters)?"
+    },
+    {
+      "whenMissing": "dimensions.width",
+      "question": "What is the kitchen width?"
+    },
+    {
+      "whenMissing": "location",
+      "question": "Where is the project located (city)?"
+    },
+    {
+      "whenMissing": "finish.tier",
+      "question": "Do you prefer laminate, acrylic, or membrane finish?"
+    }
+  ]
+}
