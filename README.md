@@ -16,19 +16,26 @@ AI-assisted **proposals and estimates** for trade professionals — with determi
 
 - Node.js 20+
 - [pnpm](https://pnpm.io) 9 (`corepack enable` or `npm i -g pnpm`)
-- Docker (Postgres + Redis + MinIO)
+- Docker ([Docker Desktop](https://www.docker.com/products/docker-desktop/) or [Colima](https://github.com/abiosoft/colima): `brew install colima docker docker-compose && colima start`)
 
 ## Quick start
 
 ```bash
 cp .env.example .env
-docker compose up -d
-
 pnpm install
 pnpm --filter @projectquote/schemas build
 
+# Postgres (pgvector) + Redis + MinIO — auto-fixes port 5432 conflicts (uses 5433)
+pnpm infra:up
+
 pnpm dev
 ```
+
+Requires a running Docker daemon. `pnpm infra:up` starts **Postgres (pgvector) + Redis**, runs **`pnpm db:migrate:deploy`**, and writes `DATABASE_URL` to `.env`. If port **5432** is already in use (e.g. Homebrew PostgreSQL), Postgres is exposed on **5433** via `docker-compose.override.yml` (gitignored).
+
+MinIO (document uploads) is optional: `docker compose --profile storage up -d`. If `minio/minio` pulls fail, log in to Docker Hub or use real S3 env vars from `.env.example`.
+
+Manual: `docker compose up -d postgres redis` then `DATABASE_URL=postgresql://projectquote:projectquote@localhost:5433/projectquote pnpm db:migrate:deploy` when using the 5433 override.
 
 - Web: http://localhost:3000  
 - API health: http://localhost:4000/health  

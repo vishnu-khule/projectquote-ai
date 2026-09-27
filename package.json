@@ -12,7 +12,9 @@
     "db:generate": "pnpm --filter @projectquote/api db:generate",
     "db:migrate": "pnpm --filter @projectquote/api db:migrate",
     "db:migrate:deploy": "pnpm --filter @projectquote/api db:migrate:deploy",
-    "db:studio": "pnpm --filter @projectquote/api db:studio"
+    "db:studio": "pnpm --filter @projectquote/api db:studio",
+    "infra:up": "bash scripts/infra-up.sh",
+    "infra:down": "bash scripts/infra-down.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",

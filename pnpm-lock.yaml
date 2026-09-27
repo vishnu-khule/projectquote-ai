@@ -56,6 +56,9 @@ importers:
       decimal.js:
         specifier: ^10.4.3
         version: 10.6.0
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
       helmet:
         specifier: ^8.3.0
         version: 8.3.0
