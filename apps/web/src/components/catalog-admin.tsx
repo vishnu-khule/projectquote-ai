@@ -11,7 +11,10 @@ type Props = {
   accessToken: string;
 };
 
+type Tab = "material" | "labour";
+
 export function CatalogAdmin({ accessToken }: Props) {
+  const [tab, setTab] = useState<Tab>("material");
   const [items, setItems] = useState<CatalogItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,22 +23,33 @@ export function CatalogAdmin({ accessToken }: Props) {
   const [category, setCategory] = useState("material");
   const [unit, setUnit] = useState("pcs");
   const [unitPrice, setUnitPrice] = useState("");
+  const [taxPercent, setTaxPercent] = useState("18");
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setItems(await listCatalogItems(accessToken));
+      setItems(await listCatalogItems(accessToken, tab));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load catalog");
     } finally {
       setLoading(false);
     }
-  }, [accessToken]);
+  }, [accessToken, tab]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (tab === "labour") {
+      setCategory("labour");
+      setUnit("hr");
+    } else {
+      setCategory("material");
+      setUnit("pcs");
+    }
+  }, [tab]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,8 +60,10 @@ export function CatalogAdmin({ accessToken }: Props) {
         sku,
         name,
         category,
+        kind: tab,
         unit,
         unitPrice,
+        taxPercent,
       });
       setSku("");
       setName("");
@@ -62,10 +78,29 @@ export function CatalogAdmin({ accessToken }: Props) {
 
   return (
     <div className="space-y-8">
+      <div className="flex gap-2">
+        {(["material", "labour"] as Tab[]).map((k) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setTab(k)}
+            className={
+              tab === k
+                ? "rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white"
+                : "rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            }
+          >
+            {k === "material" ? "Materials" : "Labour rates"}
+          </button>
+        ))}
+      </div>
+
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-900">Add catalog item</h2>
+        <h2 className="text-sm font-semibold text-slate-900">
+          Add {tab === "material" ? "material" : "labour"} item
+        </h2>
         <p className="mt-1 text-xs text-slate-500">
-          Fixed prices for your team (source: catalog, not AI).
+          Fixed prices for estimates (source: catalog, pre-confirmed).
         </p>
         <form onSubmit={onSubmit} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input
@@ -89,17 +124,24 @@ export function CatalogAdmin({ accessToken }: Props) {
             onChange={(e) => setCategory(e.target.value)}
           />
           <input
-            placeholder="Unit"
+            placeholder={tab === "labour" ? "Unit (hr)" : "Unit"}
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
           />
           <input
             required
-            placeholder="Unit price"
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
+            placeholder={tab === "labour" ? "Rate per hour" : "Unit price"}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
             value={unitPrice}
             onChange={(e) => setUnitPrice(e.target.value)}
+          />
+          <input
+            required
+            placeholder="Tax %"
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            value={taxPercent}
+            onChange={(e) => setTaxPercent(e.target.value)}
           />
           <button
             type="submit"
@@ -116,7 +158,7 @@ export function CatalogAdmin({ accessToken }: Props) {
 
       <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
         <h2 className="border-b border-slate-100 px-4 py-3 text-sm font-semibold text-slate-900">
-          Price catalog
+          {tab === "material" ? "Materials" : "Labour rates"}
         </h2>
         {loading ? (
           <p className="px-4 py-6 text-sm text-slate-500">Loading…</p>
@@ -129,6 +171,7 @@ export function CatalogAdmin({ accessToken }: Props) {
                 <th className="px-4 py-2">SKU</th>
                 <th className="px-4 py-2">Name</th>
                 <th className="px-4 py-2">Price</th>
+                <th className="px-4 py-2">Tax %</th>
                 <th className="px-4 py-2">Unit</th>
               </tr>
             </thead>
@@ -138,6 +181,7 @@ export function CatalogAdmin({ accessToken }: Props) {
                   <td className="px-4 py-2 font-mono text-xs">{item.sku}</td>
                   <td className="px-4 py-2">{item.name}</td>
                   <td className="px-4 py-2">{item.unitPrice}</td>
+                  <td className="px-4 py-2">{item.taxPercent}</td>
                   <td className="px-4 py-2 text-slate-500">{item.unit}</td>
                 </tr>
               ))}

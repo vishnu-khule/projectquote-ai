@@ -6,9 +6,12 @@ import type { CreateCatalogItemBody } from "./catalog.schemas.js";
 export class CatalogService {
   constructor(private readonly prisma: PrismaService) {}
 
-  list(orgId: string) {
+  list(orgId: string, kind?: string) {
     return this.prisma.priceCatalogItem.findMany({
-      where: { organizationId: orgId },
+      where: {
+        organizationId: orgId,
+        ...(kind ? { kind } : {}),
+      },
       orderBy: { name: "asc" },
     });
   }
@@ -20,10 +23,17 @@ export class CatalogService {
         sku: body.sku,
         name: body.name,
         category: body.category,
+        kind: body.kind ?? "material",
         unit: body.unit,
         unitPrice: body.unitPrice,
         taxPercent: body.taxPercent ?? "18",
       },
+    });
+  }
+
+  findForOrg(orgId: string, catalogItemId: string) {
+    return this.prisma.priceCatalogItem.findFirst({
+      where: { id: catalogItemId, organizationId: orgId },
     });
   }
 }

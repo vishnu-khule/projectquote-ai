@@ -142,12 +142,14 @@ export class AuthService {
     name: string;
     country: string;
     currency: string;
+    defaultTaxPercent?: string;
   }) {
     return {
       id: org.id,
       name: org.name,
       country: org.country,
       currency: org.currency,
+      defaultTaxPercent: org.defaultTaxPercent ?? "18",
     };
   }
 }

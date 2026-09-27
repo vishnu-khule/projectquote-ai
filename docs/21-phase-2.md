@@ -5,7 +5,9 @@
 - **Basic / Modern / Premium** — `POST /projects/:id/estimate/tiers/generate` applies configurable `priceUpliftPercent` from `config/project-types/*.json`
 - **Validation engine** — `POST /projects/:id/validate` (rules + totals check); blocks **approve** and **share** when `BLOCKED`
 - **RAG-lite** — document chunks indexed on processing; chat retrieves relevant chunks by keyword overlap
-- **Price catalog** — `GET/POST /catalog/items` per organization
+- **Price catalog** — `GET/POST /catalog/items` per organization (`?kind=material|labour`)
+- **Catalog → estimate** — `POST /estimates/:id/line-items/from-catalog`
+- **Org tax** — `GET/PATCH /organization/settings` (`defaultTaxPercent`)
 
 ## Migrate
 

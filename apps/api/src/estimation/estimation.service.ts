@@ -50,7 +50,12 @@ export class EstimationService {
     }
 
     const requirements = (project.requirements ?? {}) as Record<string, unknown>;
-    const lineItems = this.buildSuggestedLines(project, requirements);
+    const defaultTax = project.organization.defaultTaxPercent ?? "18";
+    const lineItems = this.buildSuggestedLines(
+      project,
+      requirements,
+      defaultTax,
+    );
     const currency = project.organization.currency ?? "INR";
 
     const totals = computeEstimateTotals({
@@ -61,7 +66,7 @@ export class EstimationService {
         labourHours: item.labourHours,
         labourRate: item.labourRate,
         discountPercent: item.discountPercent ?? "0",
-        taxPercent: item.taxPercent ?? "18",
+        taxPercent: item.taxPercent ?? defaultTax,
       })),
     });
 
@@ -82,7 +87,7 @@ export class EstimationService {
             labourHours: item.labourHours ?? null,
             labourRate: item.labourRate ?? null,
             discountPercent: item.discountPercent ?? "0",
-            taxPercent: item.taxPercent ?? "18",
+            taxPercent: item.taxPercent ?? defaultTax,
             priceSource: item.priceSource ?? "ai_suggestion",
             confirmed: item.confirmed ?? false,
           })),
@@ -135,6 +140,49 @@ export class EstimationService {
     });
     await this.recomputeTotals(estimateId, estimate);
     return this.getEstimateById(orgId, estimateId);
+  }
+
+  async addLineItemFromCatalog(
+    orgId: string,
+    estimateId: string,
+    catalogItemId: string,
+    quantity: string,
+  ) {
+    const catalogItem = await this.prisma.priceCatalogItem.findFirst({
+      where: { id: catalogItemId, organizationId: orgId },
+    });
+    if (!catalogItem) {
+      throw new NotFoundException("Catalog item not found");
+    }
+
+    const line: LineItemInput =
+      catalogItem.kind === "labour"
+        ? {
+            name: catalogItem.name,
+            category: catalogItem.category,
+            quantity,
+            unit: catalogItem.unit,
+            unitPrice: "0",
+            labourHours: quantity,
+            labourRate: catalogItem.unitPrice,
+            discountPercent: "0",
+            taxPercent: catalogItem.taxPercent,
+            priceSource: "catalog",
+            confirmed: true,
+          }
+        : {
+            name: catalogItem.name,
+            category: catalogItem.category,
+            quantity,
+            unit: catalogItem.unit,
+            unitPrice: catalogItem.unitPrice,
+            discountPercent: "0",
+            taxPercent: catalogItem.taxPercent,
+            priceSource: "catalog",
+            confirmed: true,
+          };
+
+    return this.addLineItem(orgId, estimateId, line);
   }
 
   async updateLineItem(
@@ -325,8 +373,9 @@ export class EstimationService {
       location: string | null;
     },
     requirements: Record<string, unknown>,
+    defaultTaxPercent = "18",
   ): LineItemInput[] {
-    const taxPercent = "18";
+    const taxPercent = defaultTaxPercent;
     const discountPercent = "0";
     const lines: LineItemInput[] = [
       {

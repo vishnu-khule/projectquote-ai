@@ -22,7 +22,8 @@
 - [x] Validation blocking rules (approve/share)
 - [x] Org price catalog API (materials seed)
 - [ ] Full vector embeddings + cross-project RAG
-- [ ] Labour catalog + tax admin UI
+- [x] Labour catalog + tax admin UI (material/labour tabs, org default tax)
+- [x] Catalog → estimate line picker (`POST …/line-items/from-catalog`)
 
 ## Phase 3+
 

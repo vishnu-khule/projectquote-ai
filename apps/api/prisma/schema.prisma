@@ -45,12 +45,13 @@ model User {
 }
 
 model Organization {
-  id        String               @id @default(uuid())
-  name      String
-  country   String               @default("IN")
-  currency  String               @default("INR")
-  createdAt DateTime             @default(now())
-  updatedAt DateTime             @updatedAt
+  id                 String               @id @default(uuid())
+  name               String
+  country            String               @default("IN")
+  currency           String               @default("INR")
+  defaultTaxPercent  String               @default("18")
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
   members   OrganizationMember[]
   projects       Project[]
   customers      Customer[]
@@ -63,6 +64,7 @@ model PriceCatalogItem {
   sku            String
   name           String
   category       String
+  kind           String       @default("material")
   unit           String
   unitPrice      String
   taxPercent     String       @default("18")

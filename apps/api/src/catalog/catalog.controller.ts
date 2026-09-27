@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard.js";
 import { CurrentUser } from "../common/current-user.decorator.js";
 import { ZodValidationPipe } from "../common/zod-validation.pipe.js";
@@ -15,8 +15,13 @@ export class CatalogController {
   constructor(private readonly catalog: CatalogService) {}
 
   @Get()
-  list(@CurrentUser() user: JwtPayload) {
-    return this.catalog.list(user.orgId);
+  list(
+    @CurrentUser() user: JwtPayload,
+    @Query("kind") kind?: string,
+  ) {
+    const normalized =
+      kind === "material" || kind === "labour" ? kind : undefined;
+    return this.catalog.list(user.orgId, normalized);
   }
 
   @Post()

@@ -1,9 +1,12 @@
 import { z } from "zod";
 
+export const CatalogKindSchema = z.enum(["material", "labour"]);
+
 export const CreateCatalogItemSchema = z.object({
   sku: z.string().min(1).max(60),
   name: z.string().min(1).max(200),
   category: z.string().min(1).max(80),
+  kind: CatalogKindSchema.optional().default("material"),
   unit: z.string().min(1).max(20),
   unitPrice: z.string().regex(/^\d+(\.\d+)?$/),
   taxPercent: z.string().regex(/^\d+(\.\d+)?$/).optional().default("18"),

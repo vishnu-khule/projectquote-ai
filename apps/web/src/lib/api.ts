@@ -3,7 +3,13 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 export type AuthResponse = {
   accessToken: string;
   user: { id: string; email: string; name: string | null };
-  organization: { id: string; name: string; country: string; currency: string };
+  organization: {
+    id: string;
+    name: string;
+    country: string;
+    currency: string;
+    defaultTaxPercent?: string;
+  };
 };
 
 export type ProjectDto = {
@@ -327,15 +333,49 @@ export type CatalogItemDto = {
   sku: string;
   name: string;
   category: string;
+  kind?: string;
   unit: string;
   unitPrice: string;
   taxPercent: string;
 };
 
+export type OrganizationSettingsDto = {
+  id: string;
+  name: string;
+  country: string;
+  currency: string;
+  defaultTaxPercent: string;
+};
+
+export async function getOrganizationSettings(
+  token: string,
+): Promise<OrganizationSettingsDto> {
+  const res = await fetch(`${API_URL}/organization/settings`, {
+    headers: authHeaders(token),
+  });
+  if (!res.ok) await parseError(res);
+  return res.json();
+}
+
+export async function updateOrganizationSettings(
+  token: string,
+  input: { defaultTaxPercent: string },
+): Promise<OrganizationSettingsDto> {
+  const res = await fetch(`${API_URL}/organization/settings`, {
+    method: "PATCH",
+    headers: authHeaders(token),
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) await parseError(res);
+  return res.json();
+}
+
 export async function listCatalogItems(
   token: string,
+  kind?: "material" | "labour",
 ): Promise<CatalogItemDto[]> {
-  const res = await fetch(`${API_URL}/catalog/items`, {
+  const qs = kind ? `?kind=${kind}` : "";
+  const res = await fetch(`${API_URL}/catalog/items${qs}`, {
     headers: authHeaders(token),
   });
   if (!res.ok) await parseError(res);
@@ -351,6 +391,7 @@ export async function createCatalogItem(
     unit: string;
     unitPrice: string;
     taxPercent?: string;
+    kind?: "material" | "labour";
   },
 ): Promise<CatalogItemDto> {
   const res = await fetch(`${API_URL}/catalog/items`, {
@@ -358,6 +399,23 @@ export async function createCatalogItem(
     headers: authHeaders(token),
     body: JSON.stringify(input),
   });
+  if (!res.ok) await parseError(res);
+  return res.json();
+}
+
+export async function addEstimateLineFromCatalog(
+  token: string,
+  estimateId: string,
+  input: { catalogItemId: string; quantity?: string },
+): Promise<EstimateDto> {
+  const res = await fetch(
+    `${API_URL}/estimates/${estimateId}/line-items/from-catalog`,
+    {
+      method: "POST",
+      headers: authHeaders(token),
+      body: JSON.stringify(input),
+    },
+  );
   if (!res.ok) await parseError(res);
   return res.json();
 }

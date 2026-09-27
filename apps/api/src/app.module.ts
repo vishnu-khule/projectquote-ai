@@ -7,6 +7,7 @@ import { ProposalsModule } from "./proposals/proposals.module.js";
 import { SharingModule } from "./sharing/sharing.module.js";
 import { ValidationModule } from "./validation/validation.module.js";
 import { CatalogModule } from "./catalog/catalog.module.js";
+import { OrganizationModule } from "./organization/organization.module.js";
 import { HealthController } from "./health.controller.js";
 import { PrismaModule } from "./prisma/prisma.module.js";
 import { ProjectsModule } from "./projects/projects.module.js";
@@ -25,6 +26,7 @@ import { StorageModule } from "./storage/storage.module.js";
     SharingModule,
     ValidationModule,
     CatalogModule,
+    OrganizationModule,
   ],
   controllers: [HealthController],
 })

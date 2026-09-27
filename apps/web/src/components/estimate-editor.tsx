@@ -1,13 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import {
+  addEstimateLineFromCatalog,
   confirmEstimateLineItem,
   generateProjectEstimate,
   generateTierEstimates,
   getProjectEstimate,
   getTierEstimates,
+  listCatalogItems,
   updateEstimateLineItem,
+  type CatalogItemDto,
   type EstimateDto,
   type EstimateLineItemDto,
 } from "@/lib/api";
@@ -25,6 +29,10 @@ export function EstimateEditor({ projectId, accessToken }: Props) {
   const [tierSummaries, setTierSummaries] = useState<
     { tier: string; grandTotal?: string }[]
   >([]);
+  const [catalogItems, setCatalogItems] = useState<CatalogItemDto[]>([]);
+  const [catalogItemId, setCatalogItemId] = useState("");
+  const [catalogQty, setCatalogQty] = useState("1");
+  const [addingCatalog, setAddingCatalog] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -41,6 +49,13 @@ export function EstimateEditor({ projectId, accessToken }: Props) {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (!accessToken) return;
+    listCatalogItems(accessToken)
+      .then(setCatalogItems)
+      .catch(() => setCatalogItems([]));
+  }, [accessToken]);
 
   async function onGenerate() {
     setError(null);
@@ -94,6 +109,26 @@ export function EstimateEditor({ projectId, accessToken }: Props) {
       setError(err instanceof Error ? err.message : "Save failed");
     } finally {
       setSavingId(null);
+    }
+  }
+
+  async function onAddFromCatalog() {
+    if (!estimate || !catalogItemId) return;
+    setAddingCatalog(true);
+    setError(null);
+    try {
+      const updated = await addEstimateLineFromCatalog(
+        accessToken,
+        estimate.id,
+        { catalogItemId, quantity: catalogQty },
+      );
+      setEstimate(updated);
+      setCatalogItemId("");
+      setCatalogQty("1");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not add catalog line");
+    } finally {
+      setAddingCatalog(false);
     }
   }
 
@@ -202,6 +237,49 @@ export function EstimateEditor({ projectId, accessToken }: Props) {
           ))}
         </ul>
       ) : null}
+
+      <div className="flex flex-wrap items-end gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
+        <label className="text-xs text-slate-600">
+          From catalog
+          <select
+            className="mt-1 block min-w-[200px] rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm"
+            value={catalogItemId}
+            onChange={(e) => setCatalogItemId(e.target.value)}
+          >
+            <option value="">Select item…</option>
+            {catalogItems.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.kind === "labour" ? "[Labour] " : ""}
+                {c.name} — {c.unitPrice}/{c.unit}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-xs text-slate-600">
+          Qty / hours
+          <input
+            className="mt-1 block w-20 rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+            value={catalogQty}
+            onChange={(e) => setCatalogQty(e.target.value)}
+          />
+        </label>
+        <button
+          type="button"
+          disabled={!catalogItemId || addingCatalog}
+          onClick={onAddFromCatalog}
+          className="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-500 disabled:opacity-50"
+        >
+          {addingCatalog ? "Adding…" : "Add line"}
+        </button>
+        {catalogItems.length === 0 && (
+          <Link
+            href="/settings/catalog"
+            className="text-xs text-brand-600 hover:underline"
+          >
+            Set up catalog →
+          </Link>
+        )}
+      </div>
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-sm">

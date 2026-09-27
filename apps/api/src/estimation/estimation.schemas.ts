@@ -24,6 +24,11 @@ export const ReplaceLineItemsBodySchema = z.object({
 
 export const CreateLineItemBodySchema = LineItemInputSchema;
 
+export const AddCatalogLineBodySchema = z.object({
+  catalogItemId: z.string().uuid(),
+  quantity: moneyField.optional().default("1"),
+});
+
 export const UpdateLineItemBodySchema = LineItemInputSchema.partial().refine(
   (data) => Object.keys(data).length > 0,
   { message: "At least one field required" },
@@ -33,3 +38,4 @@ export type LineItemInput = z.infer<typeof LineItemInputSchema>;
 export type CreateLineItemBody = z.infer<typeof CreateLineItemBodySchema>;
 export type ReplaceLineItemsBody = z.infer<typeof ReplaceLineItemsBodySchema>;
 export type UpdateLineItemBody = z.infer<typeof UpdateLineItemBodySchema>;
+export type AddCatalogLineBody = z.infer<typeof AddCatalogLineBodySchema>;

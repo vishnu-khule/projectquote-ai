@@ -52,6 +52,12 @@ export default function DashboardPage() {
             Price catalog
           </Link>
           <Link
+            href="/settings/tax"
+            className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Tax settings
+          </Link>
+          <Link
             href="/projects/new"
             className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-500"
           >

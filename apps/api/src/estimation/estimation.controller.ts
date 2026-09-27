@@ -15,9 +15,11 @@ import { ZodValidationPipe } from "../common/zod-validation.pipe.js";
 import type { JwtPayload } from "../auth/auth.types.js";
 import { EstimationService } from "./estimation.service.js";
 import {
+  AddCatalogLineBodySchema,
   CreateLineItemBodySchema,
   ReplaceLineItemsBodySchema,
   UpdateLineItemBodySchema,
+  type AddCatalogLineBody,
   type CreateLineItemBody,
   type LineItemInput,
   type ReplaceLineItemsBody,
@@ -83,6 +85,20 @@ export class EstimationController {
     @Body(new ZodValidationPipe(CreateLineItemBodySchema)) body: CreateLineItemBody,
   ) {
     return this.estimation.addLineItem(user.orgId, estimateId, body);
+  }
+
+  @Post("estimates/:estimateId/line-items/from-catalog")
+  addFromCatalog(
+    @CurrentUser() user: JwtPayload,
+    @Param("estimateId") estimateId: string,
+    @Body(new ZodValidationPipe(AddCatalogLineBodySchema)) body: AddCatalogLineBody,
+  ) {
+    return this.estimation.addLineItemFromCatalog(
+      user.orgId,
+      estimateId,
+      body.catalogItemId,
+      body.quantity,
+    );
   }
 
   @Patch("estimates/:estimateId/line-items/:itemId")
