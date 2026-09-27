@@ -40,6 +40,8 @@ Manual: `docker compose up -d postgres redis` then `DATABASE_URL=postgresql://pr
 - Web: http://localhost:3000  
 - API health: http://localhost:4000/health  
 
+**Local dev login** (auto-created on API start): username `vishnu`, password `vishnu` (stored as `vishnu@local.dev`). Not used in production.
+
 Set `OPENAI_API_KEY` in `.env` for live AI and **vector RAG** (keyword fallback without it).
 
 Optional: `PROPOSAL_LLM_NARRATIVE=true`, `AI_MONTHLY_BUDGET_CAP_CENTS`, `RATE_LIMIT_*`.

@@ -6,12 +6,19 @@ import { useState } from "react";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { login } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
+import {
+  DEV_DEFAULT_PASSWORD,
+  DEV_DEFAULT_USERNAME,
+  normalizeLoginEmail,
+  showDevLoginHint,
+} from "@/lib/dev-login";
 
 export default function LoginPage() {
   const router = useRouter();
   const setSession = useAuthStore((s) => s.setSession);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const devHint = showDevLoginHint();
+  const [email, setEmail] = useState(devHint ? DEV_DEFAULT_USERNAME : "");
+  const [password, setPassword] = useState(devHint ? DEV_DEFAULT_PASSWORD : "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,11 +27,19 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const session = await login({ email, password });
+      const session = await login({
+        email: normalizeLoginEmail(email),
+        password,
+      });
       setSession(session);
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const msg = err instanceof Error ? err.message : "Login failed";
+      setError(
+        msg === "Failed to fetch" || msg === "Load failed"
+          ? "Cannot reach the API (http://localhost:4000). Start the backend: pnpm dev from the repo root."
+          : msg,
+      );
     } finally {
       setLoading(false);
     }
@@ -36,6 +51,12 @@ export default function LoginPage() {
       <p className="mt-2 text-sm text-slate-600">
         Access your proposals and estimates.
       </p>
+      {devHint && (
+        <p className="mt-2 text-sm text-slate-500">
+          Dev default: username <code className="rounded bg-slate-100 px-1">vishnu</code>
+          , password <code className="rounded bg-slate-100 px-1">vishnu</code>
+        </p>
+      )}
       <div className="mt-8 space-y-4">
         <GoogleSignIn
           onSuccess={(session) => {
@@ -47,10 +68,11 @@ export default function LoginPage() {
       </div>
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <label className="block text-sm font-medium text-slate-700">
-          Email
+          Email or username
           <input
-            type="email"
+            type="text"
             required
+            autoComplete="username"
             className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -61,7 +83,7 @@ export default function LoginPage() {
           <input
             type="password"
             required
-            minLength={8}
+            autoComplete="current-password"
             className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

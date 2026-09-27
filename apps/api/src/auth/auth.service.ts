@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -8,6 +9,7 @@ import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import { PrismaService } from "../prisma/prisma.service.js";
 import type { JwtPayload } from "./auth.types.js";
+import { normalizeDevLoginEmail } from "./normalize-login-email.js";
 import type { LoginBody, RegisterBody } from "./auth.schemas.js";
 
 const BCRYPT_ROUNDS = 12;
@@ -15,8 +17,8 @@ const BCRYPT_ROUNDS = 12;
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly jwt: JwtService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(JwtService) private readonly jwt: JwtService,
   ) {}
 
   async register(body: RegisterBody) {
@@ -67,8 +69,12 @@ export class AuthService {
   }
 
   async login(body: LoginBody) {
+    const email =
+      process.env.NODE_ENV === "production"
+        ? body.email.toLowerCase().trim()
+        : normalizeDevLoginEmail(body.email);
     const user = await this.prisma.user.findUnique({
-      where: { email: body.email.toLowerCase() },
+      where: { email },
       include: {
         memberships: {
           include: { organization: true },
