@@ -44,4 +44,12 @@ export class DocumentsController {
   get(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
     return this.documents.getById(user.orgId, id);
   }
+
+  @Post("projects/:projectId/documents/reindex-embeddings")
+  reindexEmbeddings(
+    @CurrentUser() user: JwtPayload,
+    @Param("projectId") projectId: string,
+  ) {
+    return this.documents.reindexEmbeddings(user.orgId, projectId);
+  }
 }

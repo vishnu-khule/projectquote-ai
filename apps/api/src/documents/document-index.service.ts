@@ -13,6 +13,27 @@ export class DocumentIndexService {
     private readonly embedding: EmbeddingService,
   ) {}
 
+  async reindexProject(projectId: string): Promise<{ chunks: number }> {
+    const documents = await this.prisma.document.findMany({
+      where: { projectId, status: "completed" },
+    });
+    let chunks = 0;
+    for (const doc of documents) {
+      const meta = doc.metadata as Record<string, unknown>;
+      const extraction = meta.extraction as { text?: string } | undefined;
+      const text =
+        extraction?.text ??
+        (typeof meta.rawText === "string" ? meta.rawText : "");
+      if (!text.trim()) continue;
+      await this.indexFromExtraction(doc.id, text);
+      const count = await this.prisma.documentChunk.count({
+        where: { documentId: doc.id },
+      });
+      chunks += count;
+    }
+    return { chunks };
+  }
+
   async indexFromExtraction(documentId: string, text: string) {
     const normalized = text.trim();
     if (!normalized) return;

@@ -2,15 +2,12 @@ FROM node:20-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
-FROM base AS deps
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json ./
-COPY apps/api/package.json apps/api/
-COPY packages/schemas/package.json packages/schemas/
-RUN pnpm install --frozen-lockfile
-
 FROM base AS build
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json ./
+COPY apps/api ./apps/api
+COPY packages/schemas ./packages/schemas
+COPY config ./config
+RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @projectquote/schemas build
 RUN pnpm --filter @projectquote/api exec prisma generate
 RUN pnpm --filter @projectquote/api build

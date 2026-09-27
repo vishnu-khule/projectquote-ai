@@ -1,0 +1,16 @@
+name: Deploy staging
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Staging placeholder
+        run: |
+          echo "Wire your host here (Railway, Fly, ECS, etc.)."
+          echo "1. Build images from apps/api and apps/web Dockerfiles"
+          echo "2. Set secrets: DATABASE_URL, JWT_SECRET, S3_*, OPENAI_API_KEY"
+          echo "3. Run: pnpm db:migrate:deploy"

@@ -4,8 +4,10 @@ import { JwtAuthGuard } from "./jwt-auth.guard.js";
 import { CurrentUser } from "../common/current-user.decorator.js";
 import { ZodValidationPipe } from "../common/zod-validation.pipe.js";
 import {
+  GoogleSignInSchema,
   LoginBodySchema,
   RegisterBodySchema,
+  type GoogleSignInBody,
   type LoginBody,
   type RegisterBody,
 } from "./auth.schemas.js";
@@ -33,15 +35,19 @@ export class AuthController {
     return this.auth.me(user);
   }
 
-  /** Phase 1.5 placeholder — set GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET to enable wiring. */
+  @Post("google")
+  googleSignIn(
+    @Body(new ZodValidationPipe(GoogleSignInSchema)) body: GoogleSignInBody,
+  ) {
+    return this.auth.googleSignIn(body.idToken);
+  }
+
   @Get("oauth/google")
   googleOAuthStatus() {
     return {
-      enabled: Boolean(
-        process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
-      ),
-      message:
-        "Google sign-in UI is Phase 1.5. Use email/password for MVP; OAuth routes will attach here.",
+      enabled: Boolean(process.env.GOOGLE_CLIENT_ID),
+      clientId: process.env.GOOGLE_CLIENT_ID ?? null,
     };
   }
+
 }

@@ -4,13 +4,15 @@
 
 - [x] T1.1 Monorepo turbo pipeline
 - [x] T1.2 Docker compose + `.env.example`
-- [x] T1.3 GitHub Actions: lint, typecheck, test (+ Prisma validate, Docker build workflow)
+- [x] T1.3 GitHub Actions: lint, typecheck, test, Prisma validate, Playwright smoke
 - **Acceptance**: `docker compose up` healthy; CI green on main
 
 ## EPIC-2 Auth & tenancy
 
 - [x] T2.1 User register/login JWT
 - [x] T2.2 Organization on signup
+- [x] T2.3 Google sign-in (`POST /auth/google` + web GIS button)
+- [x] T2.4 Org member invites (`/organization/invites`, `/accept-invite`)
 - **Acceptance**: API creates isolated project rows per org
 
 ## EPIC-3 Projects & FSM
@@ -24,6 +26,7 @@
 - [x] T4.1 Multipart upload to S3 (MinIO-compatible)
 - [x] T4.2 BullMQ processor (inline fallback without Redis): pdf-parse, xlsx/csv
 - [x] T4.3 `GET /projects/:id/events` SSE + document status polling in UI
+- [x] T4.4 Reindex embeddings (`POST …/documents/reindex-embeddings`)
 - **Acceptance**: extraction JSON stored with job status SSE
 
 ## EPIC-5 AI chat
@@ -53,9 +56,9 @@
 - [x] T8.2 View/download event tracking on share
 - **Acceptance**: no internal fields in public JSON
 
-## Post-MVP (tracked in roadmap)
+## Post-MVP (roadmap)
 
-- Google OAuth UI (env stub: `GET /auth/oauth/google`)
-- Org member invites
-- Playwright full journey E2E in CI (smoke tests in `e2e/`)
-- Production secrets checklist (`docs/20-deployment-strategy.md`)
+- [ ] Password reset email flow
+- [ ] Full Playwright journey in CI (`E2E_FULL=1` locally)
+- [ ] Production deploy wired (see `.github/workflows/deploy-staging.yml`)
+- [ ] Phase 3: drawing vision, multi-profession packs, integrations

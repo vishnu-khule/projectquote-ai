@@ -83,6 +83,73 @@ export async function login(input: {
   return res.json();
 }
 
+export async function googleSignIn(idToken: string): Promise<AuthResponse> {
+  const res = await fetch(`${API_URL}/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idToken }),
+  });
+  if (!res.ok) await parseError(res);
+  return res.json();
+}
+
+export type OrgInviteDto = {
+  id: string;
+  email: string;
+  role: string;
+  expiresAt: string;
+  createdAt: string;
+};
+
+export async function listOrganizationInvites(
+  token: string,
+): Promise<OrgInviteDto[]> {
+  const res = await fetch(`${API_URL}/organization/invites`, {
+    headers: authHeaders(token),
+  });
+  if (!res.ok) await parseError(res);
+  return res.json();
+}
+
+export async function createOrganizationInvite(
+  token: string,
+  email: string,
+): Promise<{ acceptUrl: string; email: string }> {
+  const res = await fetch(`${API_URL}/organization/invites`, {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify({ email, role: "MEMBER" }),
+  });
+  if (!res.ok) await parseError(res);
+  return res.json();
+}
+
+export async function acceptOrganizationInvite(input: {
+  token: string;
+  password: string;
+  name?: string;
+}): Promise<AuthResponse> {
+  const res = await fetch(`${API_URL}/organization/accept-invite`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) await parseError(res);
+  return res.json();
+}
+
+export async function reindexProjectEmbeddings(
+  token: string,
+  projectId: string,
+): Promise<{ chunks: number }> {
+  const res = await fetch(
+    `${API_URL}/projects/${projectId}/documents/reindex-embeddings`,
+    { method: "POST", headers: authHeaders(token) },
+  );
+  if (!res.ok) await parseError(res);
+  return res.json();
+}
+
 export async function listProjects(token: string): Promise<ProjectDto[]> {
   const res = await fetch(`${API_URL}/projects`, {
     headers: authHeaders(token),

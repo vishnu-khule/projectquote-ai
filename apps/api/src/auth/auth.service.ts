@@ -3,6 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
+import { randomUUID } from "node:crypto";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import { PrismaService } from "../prisma/prisma.service.js";
@@ -101,6 +102,92 @@ export class AuthService {
       user: this.toUserDto(user),
       organization: this.toOrgDto(membership.organization),
     };
+  }
+
+  async issueSessionForUser(userId: string, organizationId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+    });
+    if (!user || !organization) {
+      throw new UnauthorizedException();
+    }
+    const token = this.signToken({
+      sub: user.id,
+      email: user.email,
+      orgId: organization.id,
+    });
+    return {
+      accessToken: token,
+      user: this.toUserDto(user),
+      organization: this.toOrgDto(organization),
+    };
+  }
+
+  async googleSignIn(idToken: string) {
+    const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+    if (!clientId) {
+      throw new UnauthorizedException("Google sign-in is not configured");
+    }
+    const res = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`,
+    );
+    if (!res.ok) {
+      throw new UnauthorizedException("Invalid Google token");
+    }
+    const payload = (await res.json()) as {
+      email?: string;
+      aud?: string;
+      email_verified?: string;
+    };
+    if (payload.aud !== clientId || payload.email_verified !== "true") {
+      throw new UnauthorizedException("Google token validation failed");
+    }
+    const email = payload.email?.toLowerCase();
+    if (!email) {
+      throw new UnauthorizedException("Google account has no email");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: {
+        memberships: {
+          include: { organization: true },
+          orderBy: { organization: { createdAt: "asc" } },
+          take: 1,
+        },
+      },
+    });
+
+    if (!user) {
+      const passwordHash = await bcrypt.hash(
+        `google-oauth-${randomUUID()}`,
+        BCRYPT_ROUNDS,
+      );
+      const result = await this.prisma.$transaction(async (tx) => {
+        const created = await tx.user.create({
+          data: { email, passwordHash, name: email.split("@")[0] },
+        });
+        const organization = await tx.organization.create({
+          data: { name: `${created.name}'s workspace` },
+        });
+        await tx.organizationMember.create({
+          data: {
+            userId: created.id,
+            organizationId: organization.id,
+            role: "OWNER",
+          },
+        });
+        return { user: created, organization };
+      });
+      return this.issueSessionForUser(result.user.id, result.organization.id);
+    }
+
+    const membership = user.memberships[0];
+    if (!membership) {
+      throw new UnauthorizedException("User has no organization");
+    }
+    return this.issueSessionForUser(user.id, membership.organizationId);
   }
 
   async me(payload: JwtPayload) {

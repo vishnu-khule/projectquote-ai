@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service.js";
 import { ProjectsService } from "../projects/projects.service.js";
 import { StorageService } from "../storage/storage.service.js";
+import { DocumentIndexService } from "./document-index.service.js";
 import { DocumentProcessingQueue } from "./document-processing.queue.js";
 import { validateUpload } from "./file-validation.js";
 
@@ -17,7 +18,13 @@ export class DocumentsService {
     private readonly storage: StorageService,
     private readonly projects: ProjectsService,
     private readonly processingQueue: DocumentProcessingQueue,
+    private readonly documentIndex: DocumentIndexService,
   ) {}
+
+  async reindexEmbeddings(orgId: string, projectId: string) {
+    await this.projects.assertProjectAccess(orgId, projectId);
+    return this.documentIndex.reindexProject(projectId);
+  }
 
   async upload(
     orgId: string,
